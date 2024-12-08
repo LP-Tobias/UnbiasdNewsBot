@@ -1,2 +1,2 @@
-# NewsBot
+# Unbiased News Bot
  
