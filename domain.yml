@@ -1,34 +1,55 @@
+# domain.yml
 version: "3.1"
 
 intents:
   - greet
   - goodbye
+  - request_news
+  - summarize_news
+  - provide_feedback
   - affirm
   - deny
-  - mood_great
-  - mood_unhappy
-  - bot_challenge
+
+entities:
+  - topic
+
+slots:
+  topic:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+
+  news_summary:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+
+  user_feedback:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+
 
 responses:
   utter_greet:
-  - text: "Hey! How are you?"
-
-  utter_cheer_up:
-  - text: "Here is something to cheer you up:"
-    image: "https://i.imgur.com/nGF1K8f.jpg"
-
-  utter_did_that_help:
-  - text: "Did that help you?"
-
-  utter_happy:
-  - text: "Great, carry on!"
-
+    - text: "Hello! How can I help you today?"
   utter_goodbye:
-  - text: "Bye"
+    - text: "Goodbye!"
+  utter_ask_topic:
+    - text: "Which topic of news are you interested in?"
+  utter_news_found:
+    - text: "Here are the top headlines I found."
+  utter_no_news_found:
+    - text: "I didn't find relevant news on that topic."
+  utter_default:
+    - text: "I’m sorry, I didn’t understand that."
 
-  utter_iamabot:
-  - text: "I am a bot, powered by Rasa."
-
-session_config:
-  session_expiration_time: 60
-  carry_over_slots_to_new_session: true
+actions:
+  - action_fetch_news
+  - action_summarize_news
+  - action_debias_summary
+  - action_perspective_feedback
+  - action_default_fallback

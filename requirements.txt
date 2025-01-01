@@ -1,0 +1,5 @@
+rasa
+openai == 0.28
+requests
+langchain
+python-dotenv

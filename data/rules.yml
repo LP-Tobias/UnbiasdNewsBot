@@ -1,13 +1,17 @@
+# data/rules.yml
 version: "3.1"
-
 rules:
 
-- rule: Say goodbye anytime the user says goodbye
+- rule: Default Fallback
   steps:
-  - intent: goodbye
-  - action: utter_goodbye
+    - intent: nlu_fallback
+    - action: action_default_fallback
 
-- rule: Say 'I am a bot' anytime the user challenges
+- rule: Summarize news rule
+  condition:
+  - active_loop: null
   steps:
-  - intent: bot_challenge
-  - action: utter_iamabot
+    - intent: summarize_news
+    - action: action_summarize_news
+    - action: action_debias_summary
+    - action: action_perspective_feedback
