@@ -23,6 +23,10 @@ from rasa_sdk.types import DomainDict
 
 # Make sure to `pip install langchain openai google-api-python-client requests` as needed.
 import openai
+from newsapi import NewsApiClient
+
+from Dbias.bias_classification import classifier
+from Dbias.bias_recognition import recognizer
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +41,6 @@ class ActionFetchNews(Action):
     def name(self) -> Text:
         return "action_fetch_news"
 
-    # Note: changed 'domain: DomainDict' to 'domain: Dict[Text, Any]'
     async def run(
         self, 
         dispatcher: CollectingDispatcher,
@@ -50,38 +53,98 @@ class ActionFetchNews(Action):
             dispatcher.utter_message(text="Please specify a topic for news.")
             return []
 
-        url = "https://newsapi.org/v2/everything"
-        params = {
-            "q": topic,
-            "apiKey": NEWS_API_KEY,
-            "pageSize": 5,
-            "language": "en",
-        }
+        # Initialize the NewsAPI client
+        newsapi = NewsApiClient(api_key=NEWS_API_KEY)
 
-        response = requests.get(url, params=params)
-        if response.status_code != 200:
+        try:
+            response = newsapi.get_everything(
+                q=topic,
+                language="en",
+                page_size=1
+            )
+        except Exception as e:
+            dispatcher.utter_message(text=f"Error fetching news: {e}")
+            return []
+
+        # Check if the API returned a successful response
+        if response.get("status") != "ok":
             dispatcher.utter_message(text="I encountered an error fetching the news.")
             return []
 
-        data = response.json()
-        articles = data.get("articles", [])
+        articles = response.get("articles", [])
         if not articles:
             dispatcher.utter_message(text="I didn't find relevant news on that topic.")
             return []
 
-        # Combine article content
+        # We'll build a combined text string AND also show each article to the user
         combined_news_text = ""
-        for article in articles:
-            title = article.get("title", "")
+        dispatcher.utter_message(text="Here are the latest articles I found:")
+
+        for idx, article in enumerate(articles, start=1):
+            title = article.get("title", "Untitled")
             description = article.get("description", "")
             content = article.get("content", "")
-            combined_news_text += f"Title: {title}\nDescription: {description}\nContent: {content}\n\n"
+            source_name = article.get("source", {}).get("name", "Unknown Source")
 
-        # Store text in a slot
+            # Send each article to the user
+            dispatcher.utter_message(
+                text=(
+                    f"**Article {idx}:**\n"
+                    f"Title: {title}\n"
+                    f"Source: {source_name}\n"
+                    f"Description: {description}\n"
+                    f"Content: {content}\n"
+                )
+            )
+
+            # Also build the combined text
+            combined_news_text += (
+                f"Title: {title}\n"
+                f"Source: {source_name}\n"
+                f"Description: {description}\n"
+                f"Content: {content}\n\n"
+            )
+
+        # Store in a slot for subsequent summarization or debiasing
         return [
             {"event": "slot", "name": "news_summary", "value": combined_news_text}
         ]
 
+class ActionBiasDetection(Action):
+    """Use Dbias package to detect biases in the news content."""
+
+    def name(self) -> Text:
+        return "action_bias_detection"
+    
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: DomainDict) -> List[Dict[Text, Any]]:
+        
+        # Get the news content
+        news_text = tracker.get_slot("news_summary")
+        if not news_text:
+            dispatcher.utter_message(text="I don't have news to analyze.")
+            return []
+        
+        # Use the Dbias package to classify the bias
+        bias = classifier(news_text)
+        dispatcher.utter_message(text=f"The news content is classified as: {bias}")
+        # probably store the bias in a slot for future reference
+        # return [
+        #     {"event": "slot", "name": "news_bias", "value": bias}
+        # ]
+
+class ActionBiasRecognition(Action):
+    """Use Dbias package to recognize biases in the news content."""
+
+    def name(self) -> Text:
+        return "action_bias_recognition"
+    
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: DomainDict) -> List[Dict[Text, Any]]:
+        
+        pass
 
 class ActionSummarizeNews(Action):
     """Use an LLM to summarize the fetched news."""

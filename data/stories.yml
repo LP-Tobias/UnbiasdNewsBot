@@ -12,9 +12,10 @@ stories:
   steps:
     - intent: request_news
     - action: action_fetch_news
-    - action: action_summarize_news
-    - action: action_debias_summary
-    - action: action_perspective_feedback
+    - action: action_bias_detection
+    # - action: action_summarize_news
+    # - action: action_debias_summary
+    # - action: action_perspective_feedback
 
 - story: user says goodbye
   steps:

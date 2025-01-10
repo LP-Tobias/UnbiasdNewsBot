@@ -49,6 +49,8 @@ responses:
 
 actions:
   - action_fetch_news
+  - action_bias_detection
+  - action_bias_recognition
   - action_summarize_news
   - action_debias_summary
   - action_perspective_feedback
