@@ -5,53 +5,104 @@ intents:
   - greet
   - goodbye
   - request_news
-  - summarize_news
-  - provide_feedback
-  - affirm
-  - deny
+  # - summarize_news
+  # - provide_feedback
+  # - affirm
+  # - deny
 
 entities:
   - topic
+  - number_of_news
 
 slots:
   topic:
     type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: topic
+  
+  n_news:
+    type: float
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: number_of_news
+    
+  news_fetched:
+    type: text
     influence_conversation: false
     mappings:
-      - type: from_text
+      - type: custom
 
   news_summary:
     type: text
     influence_conversation: false
     mappings:
-      - type: from_text
+      - type: custom
 
-  user_feedback:
+  summary_bias:
     type: text
     influence_conversation: false
     mappings:
-      - type: from_text
+      - type: custom
+  
+  summary_biased_words:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+  Dbias_summary:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+  
+  LLM_debias_summary:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+  
+  LLM_summary_score:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: custom
+
+
+  # user_feedback:
+  #   type: text
+  #   influence_conversation: false
+  #   mappings:
+  #     - type: from_text
 
 
 responses:
-  utter_greet:
-    - text: "Hello! How can I help you today?"
-  utter_goodbye:
-    - text: "Goodbye!"
+  # utter_greet:
+  #   - text: "Hello! How can I help you today?"
+  # utter_goodbye:
+  #   - text: "Goodbye!"
   utter_ask_topic:
     - text: "Which topic of news are you interested in?"
-  utter_news_found:
-    - text: "Here are the top headlines I found."
-  utter_no_news_found:
-    - text: "I didn't find relevant news on that topic."
+  # utter_news_found:
+  #   - text: "Here are the top headlines I found."
+  # utter_no_news_found:
+  #   - text: "I didn't find relevant news on that topic."
   utter_default:
     - text: "I’m sorry, I didn’t understand that."
 
 actions:
   - action_fetch_news
-  - action_bias_detection
-  - action_bias_recognition
   - action_summarize_news
-  - action_debias_summary
-  - action_perspective_feedback
+  # - action_bias_detection
+  - action_bias_detection_summary
+  # - action_bias_recognition
+  - action_bias_recognition_summary
+  - action_dbias_summary
+  - action_llm_debias_summary
+  - action_llm_summary_bias_detection
+  # - action_perspective_feedback
   - action_default_fallback
+  - action_reset_slots

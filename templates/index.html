@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat with Rasa Bot</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div id="chatbox">
+    <div id="messages"></div>
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="Type your message..." autofocus>
+        <button id="send-btn">➤</button>
+    </div>
+</div>
+
+<script>
+    const messagesDiv = document.getElementById("messages");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    sendBtn.addEventListener("click", sendMessage);
+    userInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
+
+    function sendMessage() {
+        const message = userInput.value.trim();
+        if (message === "") return;
+
+        // Show user's message aligned to the right
+        appendMessage(message, "user");
+
+        // Clear input field
+        userInput.value = "";
+
+        // Send message to Flask backend
+        fetch("http://localhost:5000/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Combine multiple bot messages into a single bubble
+            const combinedBotReply = data.messages.join("\n\n");
+            appendMessage(combinedBotReply, "bot");
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    function appendMessage(message, sender) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `message ${sender}`;
+        msgDiv.innerText = message;
+        messagesDiv.appendChild(msgDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+</script>
+
+</body>
+</html>

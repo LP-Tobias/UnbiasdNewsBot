@@ -1,0 +1,26 @@
+{
+  "lookup": {
+    "rules": {
+      "[{\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"summarize_news\"}}]": "action_summarize_news",
+      "[{\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_summarize_news\"}, \"user\": {\"intent\": \"summarize_news\"}}]": "action_debias_summary",
+      "[{\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_summarize_news\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_debias_summary\"}, \"user\": {\"intent\": \"summarize_news\"}}]": "action_perspective_feedback",
+      "[{\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_summarize_news\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_debias_summary\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_perspective_feedback\"}, \"user\": {\"intent\": \"summarize_news\"}}]": "action_listen",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"nlu_fallback\"}}]": "action_default_fallback",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"nlu_fallback\"}}, {\"prev_action\": {\"action_name\": \"action_default_fallback\"}, \"user\": {\"intent\": \"nlu_fallback\"}}]": "action_listen"
+    },
+    "rule_only_slots": [],
+    "rule_only_loops": [],
+    "rules_for_loop_unhappy_path": {},
+    "rules_not_in_stories": [
+      "[{\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_summarize_news\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_debias_summary\"}, \"user\": {\"intent\": \"summarize_news\"}}]",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"nlu_fallback\"}}, {\"prev_action\": {\"action_name\": \"action_default_fallback\"}, \"user\": {\"intent\": \"nlu_fallback\"}}]",
+      "[{\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_summarize_news\"}, \"user\": {\"intent\": \"summarize_news\"}}]",
+      "[{\"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"nlu_fallback\"}}]",
+      "[{\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_summarize_news\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_debias_summary\"}, \"user\": {\"intent\": \"summarize_news\"}}, {\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_perspective_feedback\"}, \"user\": {\"intent\": \"summarize_news\"}}]",
+      "predicting default action with intent session_start",
+      "[{\"active_loop\": {\"name\": \"should_not_be_set\"}, \"prev_action\": {\"action_name\": \"action_listen\"}, \"user\": {\"intent\": \"summarize_news\"}}]",
+      "predicting default action with intent restart",
+      "predicting default action with intent back"
+    ]
+  }
+}

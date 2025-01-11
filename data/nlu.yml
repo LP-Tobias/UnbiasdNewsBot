@@ -15,10 +15,13 @@ nlu:
 
 - intent: request_news
   examples: |
-    - Give me the latest news
-    - I want news about tech
-    - Show me business headlines
-    - I'd like to read news about [climate change](topic)
+    - I want [5](number_of_news) news about [Russia](topic)
+    - I want to read news on [Ukraine](topic)
+    - Show me [3](number_of_news) the latest news on [technology](topic)
+    - Do you have any updates about [COVID-19](topic)?
+    - Tell me what's happening in [politics](topic)
+    - Give me [2](number_of_news) news related to [sports](topic)
+    - What's the latest on [Elon Musk](topic)?
 
 - intent: summarize_news
   examples: |
