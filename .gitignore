@@ -2,4 +2,4 @@ venv/
 .vscode/
 .envs
 *.tar.gz
-./rasa/
+.rasa/

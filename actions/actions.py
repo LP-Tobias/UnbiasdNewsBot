@@ -889,8 +889,6 @@ class ActionCotDebiasSummary(Action):
             system_prompt = (
                 "You are a professional news editor specialized in unbiased summariation. "
                 "Your task is to summarize news articles by eliminating biases while maintaining factual accuracy and clarity."
-                # "Try to aviod using biased words in the summary."
-                # "If possible, make it 3-4 sentences long. User-reading friendly."
             )
 
             user_prompt = (

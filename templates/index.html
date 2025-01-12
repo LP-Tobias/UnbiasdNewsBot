@@ -2,15 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chat with Rasa Bot</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚖️ Neutral Thoughts: Unbiased News Chatbot</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Additional styles */
+        body {
+            background-color: #181a1c; /* Darker background */
+        }
+        #send-btn {
+            background-color: #ffffff; /* White send button */
+            color: #5865f2; /* Complementary text color */
+        }
+        #send-btn:hover {
+            background-color: #dddddd; /* Slightly darker white on hover */
+        }
+        #user-input::placeholder {
+            color: #aaaaaa; /* Placeholder text color */
+            font-style: italic;
+        }
+        #page-title {
+            text-align: center;
+            font-size: 28px;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 
 <div id="chatbox">
+    <h1 id="page-title">⚖️ Neutral Thoughts: Unbiased News Chatbot</h1>
     <div id="messages"></div>
     <div id="input-container">
-        <input type="text" id="user-input" placeholder="Type your message..." autofocus>
+        <input type="text" id="user-input" placeholder="Request for News, e.g. 'I want 2 news about Elon Musk'" autofocus>
         <button id="send-btn">➤</button>
     </div>
 </div>
