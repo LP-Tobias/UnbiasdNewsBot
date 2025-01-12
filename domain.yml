@@ -5,10 +5,7 @@ intents:
   - greet
   - goodbye
   - request_news
-  # - summarize_news
-  # - provide_feedback
-  # - affirm
-  # - deny
+  - provide_topic
 
 entities:
   - topic
@@ -90,38 +87,23 @@ slots:
       - type: custom
 
 
-  # user_feedback:
-  #   type: text
-  #   influence_conversation: false
-  #   mappings:
-  #     - type: from_text
-
 
 responses:
-  # utter_greet:
-  #   - text: "Hello! How can I help you today?"
-  # utter_goodbye:
-  #   - text: "Goodbye!"
+  utter_greet:
+    - text: "Hello! What news do you want to know about?"
   utter_ask_topic:
     - text: "Which topic of news are you interested in?"
-  # utter_news_found:
-  #   - text: "Here are the top headlines I found."
-  # utter_no_news_found:
-  #   - text: "I didn't find relevant news on that topic."
   utter_default:
     - text: "I’m sorry, I didn’t understand that."
 
 actions:
   - action_fetch_news
   - action_summarize_news
-  # - action_bias_detection
   - action_bias_detection_summary
-  # - action_bias_recognition
   - action_bias_recognition_summary
   - action_dbias_summary
   - action_llm_debias_summary
   - action_llm_summary_bias_detection
-  # - action_perspective_feedback
   - action_llm_analysis
   - action_cot_bias_detection
   - action_cot_debias_summary

@@ -896,7 +896,7 @@ class ActionCotDebiasSummary(Action):
                 f"**Content:** {content}\n\n"
                 f"**Detected Biases:** {bias_detection}\n\n"
                 f"**Analysis:** {analysis.get('body', '')}\n\n"
-                "Summarize the article to remove any potential biases or subjective language while preserving the core message."
+                "Summarize the article into a paragraph, remove any potential biases or subjective language while preserving the core message."
             )
 
             try:

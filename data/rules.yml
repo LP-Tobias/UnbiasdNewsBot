@@ -1,8 +1,13 @@
-# data/rules.yml
 version: "3.1"
 
 rules:
-- rule: Handle fallback after request_news with a topic
+- rule: Greet
+  steps:
+    - intent: greet
+    - action: utter_greet
+    - action: action_listen
+
+- rule: Handle request_news when topic is provided
   condition:
     - slot_was_set:
         - topic
@@ -11,8 +16,6 @@ rules:
     - action: action_fetch_news
     - action: action_summarize_news
     - action: action_bias_detection_summary
-    # - action: action_bias_recognition_summary
-    # - action: action_dbias_summary
     - action: action_llm_debias_summary
     - action: action_llm_summary_bias_detection
     - action: action_llm_analysis
@@ -21,13 +24,16 @@ rules:
     - action: action_reset_slots
     - action: action_listen
 
-- rule: Handle fallback after request_news without a topic
+- rule: Handle request_news when topic is not provided
   condition:
     - slot_was_set:
         - topic: null
   steps:
     - intent: request_news
     - action: utter_ask_topic
+    - action: action_listen
+
+
 
 - rule: Handle default fallback
   steps:

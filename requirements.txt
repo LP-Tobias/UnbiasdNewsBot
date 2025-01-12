@@ -5,6 +5,7 @@ openai == 0.28
 requests
 python-dotenv
 newsapi-python
+# installing this need to upgrade packaging, and then downgrade it to make it work in rasa.
 newspaper3k
 
 # These two require a mannual installation

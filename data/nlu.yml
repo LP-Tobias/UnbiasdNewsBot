@@ -1,11 +1,14 @@
-# data/nlu.yml
 version: "3.1"
+
 nlu:
 - intent: greet
   examples: |
     - Hello
     - Hi
     - Hey there
+    - Good morning
+    - Good afternoon
+    - Good evening
 
 - intent: goodbye
   examples: |
@@ -15,21 +18,547 @@ nlu:
 
 - intent: request_news
   examples: |
-    - I want [5](number_of_news) news about [Russia](topic)
-    - I want to read news on [Ukraine](topic)
-    - Show me [3](number_of_news) the latest news on [technology](topic)
-    - Do you have any updates about [COVID-19](topic)?
-    - Tell me what's happening in [politics](topic)
-    - Give me [2](number_of_news) news related to [sports](topic)
-    - What's the latest on [Elon Musk](topic)?
+    # Middle Eastern Crisis and its subtopics
+    - I'd like some news about [Middle Eastern Crisis](topic)
+    - Show me the latest headlines on [Israel-Gaza War](topic)
+    - Give me [3](number_of_news) stories about [Israel-Lebanon Conflict](topic)
+    - Any updates on [University Campus Activism](topic)?
+    - I'd like to read about [Israel-Iran Conflict](topic)
 
-- intent: summarize_news
-  examples: |
-    - Summarize that for me
-    - Can you give me a summary?
+    # Democracy and its subtopics
+    - What’s happening in [Democracy](topic)?
+    - I want [2](number_of_news) stories on [Voting Access/Rights](topic)
+    - Do you have any updates on [Fate of US Democracy](topic)?
+    - Let me see the latest on [Election Security](topic)
 
-- intent: provide_feedback
+    # Crime and its subtopics
+    - Show me news about [Crime](topic)
+    - What's new with [Violent Crime](topic)?
+    - I'd like [4](number_of_news) headlines on [Financial and Corporate Crime](topic)
+    - Any reports on [Legal Proceedings](topic)?
+    - Do you have anything on [Police Misconduct](topic)?
+    - Bring me stories about [Cybercrime and Security Threats](topic)
+    - Tell me what's happening in [Political Corruption](topic)
+    - I want [5](number_of_news) articles about [Terrorism](topic)
+    - Any recent coverage on [Sexual Misconduct](topic)?
+    - Give me updates on [Drug-Related Crime](topic)
+
+    # Guns and its subtopics
+    - Could I see some news about [Guns](topic)?
+    - What's going on with [Gun Legislation and Regulation](topic)?
+    - Show me [2](number_of_news) stories about [Gun Safety and Violence](topic)
+    - Any latest headlines on [Legal and Societal Implications of Guns](topic)?
+    - I'd like to read about [National Rifle Association (NRA)](topic)
+
+    # Immigration and its subtopics
+    - I'd like some news on [Immigration](topic)
+    - What's happening with [Border Security](topic)?
+    - Any updates on [Immigration Policy and Reform](topic)?
+    - Show me news on [Government Action](topic)
+    - Give me [3](number_of_news) stories about [Asylum and Refugees](topic)
+    - Any recent coverage of [Migration Trends](topic)?
+
+    # Russian-Ukraine War and its subtopics
+    - I want news about the [Russian-Ukraine War](topic)
+    - What's the latest on [Russian Military Operations](topic)?
+    - Tell me about [Ukrainian Military Operations](topic)
+    - Show me headlines regarding [Ceasefire Negotiations](topic)
+    - Any news on [US Foreign Aid](topic)?
+
+    # Environment and its subtopics
+    - Could I see some news on the [Environment](topic)?
+    - What's new in [Climate Change](topic)?
+    - I'd like to read about [Wildlife Conservation](topic)
+    - Any updates on [Agriculture](topic)?
+    - Show me [2](number_of_news) stories about [Renewable Energy](topic)
+    - Bring me news about [Government Regulation](topic) in the environment
+
+    # Taxes and its subtopics
+    - I'd like some news about [Taxes](topic)
+    - Give me headlines on [Tax Policy and Legislation](topic)
+    - Any updates regarding [IRS and Tax Compliance](topic)?
+    - What's happening with [Personal Taxes](topic)?
+    - Tell me what's new in [Corporate Taxes](topic)
+
+    # Education and its subtopics
+    - Show me stories about [Education](topic)
+    - I'd like [3](number_of_news) articles on [Diversity and Inclusion](topic) in schools
+    - Any news on [Student Loans](topic)?
+    - Give me updates about [Higher Education Policies and Leadership](topic)
+    - What's new with [Technology and Modern Learning](topic)?
+    - Any recent coverage of [Academic Integrity](topic)?
+
+    # Trump Legal Troubles and its subtopics
+    - Could you share updates on [Trump Legal Troubles](topic)?
+    - Show me [2](number_of_news) about the [Jan. 6 Riot](topic) investigations
+    - Any coverage of [Supreme Court and Presidential Immunity](topic)?
+    - What's happening in the [Civil Fraud Trial](topic)?
+    - Do you have any updates on the [Asset Inflation Case](topic)?
+    - I'd like news about the [Election Subversion Trial](topic)
+    - Any latest headlines on the [Classified Material Case](topic)?
+    - Bring me stories on the [Hush-Money Scheme](topic)
+    - What's new with the [Real Estate Lawsuits](topic)?
+    - Show me coverage of [Business Tax Disputes](topic)
+
+    # 2024 Election and its subtopics
+    - I'm interested in news about the [2024 Election](topic)
+    - I'd like the latest on the [Presidential Horse Race](topic)
+    - Any updates on the [Senate Horse Race](topic)?
+    - Show me stories about the [House Horse Race](topic)
+    - Give me [3](number_of_news) on the [Governor Horse Race](topic)
+    - Any discussion on [Biden's Age](topic)?
+    - What's the buzz about the [Kamala Harris Campaign](topic)?
+    - Let me know about [Voter Concerns](topic)
+
+    # Foreign Policy and its subtopics
+    - I'd like some updates on [Foreign Policy](topic)
+    - Could you show me news related to [China](topic)?
+    - Any headlines on the [Middle East](topic) situation?
+    - Show me what's going on with the [European Union](topic)
+    - I'd like to read about [Africa](topic) affairs
+    - What's new in [NATO](topic)?
+    - Bring me [4](number_of_news) stories on [Latin America](topic)
+
+    # Politician and its subtopics
+    - Show me news about [Politician](topic)
+    - Any stories about a [US House Representative](topic)?
+    - I'd like updates on a [US Senator](topic)
+    - What's happening with a [State Governor](topic)?
+    - Any coverage of a [US State Official](topic)?
+    - Give me headlines about a [Non-US Political Official](topic)
+
+    # Reproductive Rights and its subtopics
+    - I want to read about [Reproductive Rights](topic)
+    - Any updates on [Abortion Regulation](topic)?
+    - Show me news about [Abortion and Politics](topic)
+    - I'd like coverage of [Abortion Advocacy and Activism](topic)
+    - What's happening with [Birth Control](topic)?
+    - Do you have anything on [Fertility Treatment](topic)?
+
+    # Healthcare and its subtopics
+    - I'm looking for news on [Healthcare](topic)
+    - Could you share stories about [Health Insurance](topic)?
+    - Any headlines regarding [Medical Malpractice](topic)?
+    - What's new in [Government Regulation](topic) of healthcare?
+
+    # LGBTQ and its subtopics
+    - I'd like some updates on [LGBTQ](topic)
+    - Any coverage of [Transgender Rights](topic)?
+    - Show me [2](number_of_news) articles on [Christian Church Divide](topic)
+
+    # Transportation and its subtopics
+    - Show me what's happening in [Transportation](topic)
+    - I'd like to read about [Public Transit](topic)
+    - Any recent news on [Transportation Safety](topic)?
+
+    # Animals and its subtopics
+    - Could I see news regarding [Animals](topic)?
+    - I'd like coverage of [Animal Behavior](topic)
+    - What's new with [Animal Welfare](topic)?
+
+    # Arts and Entertainment and its subtopics
+    - I want news about [Arts and Entertainment](topic)
+    - Show me stories on the [Art Industry](topic)
+    - Could you share headlines on [Award Show](topic)?
+    - I'm interested in updates about the [TV Industry](topic)
+    - Any news on [Literature](topic)?
+    - What's happening in the [Film/Movie Industry](topic)?
+    - I'd like coverage of the [Fashion Industry](topic)
+    - Any headlines from the [Music Industry](topic)?
+
+    # Celebrity and its subtopics
+    - Do you have news about [Celebrity](topic)?
+    - What's the latest on [Taylor Swift](topic)?
+    - Any stories of a [Celebrity Relationship](topic)?
+    - Tell me about a [Celebrity Scandal](topic)
+    - Show me coverage of the [Royal Family](topic)
+
+    # Home and Lifestyle and its subtopics
+    - I'd like some coverage on [Home and Lifestyle](topic)
+    - Any stories about [Food and Cooking](topic)?
+    - Give me [3](number_of_news) updates on [Home Improvement](topic)
+
+    # Travel and Tourism and its subtopics
+    - I'm interested in [Travel and Tourism](topic)
+    - Show me the latest [Travel Tips](topic)
+
+    # Religion and its subtopics
+    - Could you bring me news about [Religion](topic)?
+    - Any coverage of [Religious Leaders and Influence](topic)?
+    - What's new with [Religion and Social Issues](topic)?
+
+    # Holidays and its subtopics
+    - Show me what's happening around [Holidays](topic)
+    - I want to read stories on [Gift Ideas](topic)
+    - Any announcements about [Holiday Hours](topic)?
+
+    # Business - Corporate Strategy and its subtopics
+    - I'd like updates on [Business - Corporate Strategy](topic)
+    - Show me news on [Mergers and Acquisitions](topic)
+    - What's the latest about [Financial Restructuring](topic)?
+    - Give me headlines on [Company Performance](topic)
+
+    # Business - Industry Developments and its subtopics
+    - Show me news about [Business - Industry Developments](topic)
+    - I'd like to see updates on the [Electric Vehicle Industry](topic)
+    - Any recent stories about the [Retail Industry](topic)?
+    - Tell me what's new in the [Media Industry](topic)
+    - Show me what's happening in the [Tech Industry](topic)
+
+    # Health and Wellness and its subtopics
+    - I want stories on [Health and Wellness](topic)
+    - Any news on [COVID-19](topic)?
+    - I'd like [2](number_of_news) updates about [Nutrition and Diet](topic)
+    - Show me news on [Exercise](topic)
+    - Are there any headlines about [Skincare](topic)?
+    - What's happening in [Sleep](topic)?
+    - I'd like updates on [Drugs and Alcohol](topic)
+    - Any coverage of [Mental Health ](topic)?
+
+    # Man-Made Disaster and its subtopics
+    - Could I see news on [Man-Made Disaster](topic)?
+    - Any coverage of an [Airplane Crash](topic)?
+    - What's new with a [Car Accident](topic)?
+
+    # Weather and Natural Disaster and its subtopics
+    - Show me stories about [Weather and Natural Disaster](topic)
+    - I'd like coverage of an [Earthquake](topic)
+    - Any updates on the [Heat Wave](topic)?
+    - Show me [3](number_of_news) headlines about a [Hurricane](topic)
+    - What's happening with [Wildfire](topic)?
+    - Are there any stories on a [Snow Storm](topic)?
+    - I'd like to read about [Flooding](topic)
+
+    # US Economy and its subtopics
+    - Give me news on the [US Economy](topic)
+    - What's happening with [Inflation and Prices](topic)?
+    - Any coverage of [Monetary Policy](topic)?
+    - Show me stories about the [Stock Market](topic)
+    - I'd like headlines on [Government Spending](topic)
+    - What’s new with [Employment and Wages](topic)?
+    - Any news about the [Housing Market](topic)?
+    - Any updates on [Consumer Activity](topic)?
+    - I'd like to see what's happening with [Trade](topic)
+    - Show me stories on [Financial Oversight](topic)
+
+    # Non-US Economy and its subtopics
+    - Show me news about the [Non-US Economy](topic)
+    - I'd like to see updates on [China Economy](topic)
+    - Any stories about the [Europe Economy](topic)?
+    - What’s happening with the [Global Economy](topic)?
+
+    # Sports - Baseball and its subtopics
+    - Any news in [Sports - Baseball](topic)?
+    - I'd like the latest about [MLB](topic)
+
+    # Sports - Basketball and its subtopics
+    - Show me stories on [Sports - Basketball](topic)
+    - Any updates from the [NBA](topic)?
+    - What’s happening in [Men's College Basketball](topic)?
+    - I'd like news on [Women's College Basketball](topic)
+    - Any coverage of the [WNBA](topic)?
+
+    # Sports - Football and its subtopics
+    - Could you bring me news about [Sports - Football](topic)?
+    - Any headlines about the [NFL](topic)?
+    - I'd like [2](number_of_news) stories on [College Football](topic)
+
+    # Sports - Other and its subtopics
+    - I'd like news about [Sports - Other](topic)
+    - Any coverage of the [NHL](topic)?
+    - What's happening in [Soccer](topic)?
+    - Show me updates on the [2024 Olympics](topic)
+    - Any headlines on [Golf](topic)?
+    - I'd like to read about [Tennis](topic)
+    - Do you have anything on [Boxing](topic)?
+
+    # Science and its subtopics
+    - I'd like coverage of [Science ](topic)
+    - Any news about [Astronomy ](topic)?
+    - Any coverage of [Paleoanthropology ](topic)?
+
+    # Technology and its subtopics
+    - Could I see some news about [Technology](topic)?
+    - What's happening in [Artificial Intelligence (AI)](topic)?
+    - Show me news on [Cybersecurity and Privacy](topic)
+    - I'd like headlines on [Smartphone Technology](topic)
+    - Any updates on [Space and Aerospace Technologies](topic)?
+    - Bring me stories about [Electric Vehicles](topic)
+    - Any coverage of [Digital Media and Advertising](topic)?
+    - I'd like [2](number_of_news) on [Consumer Technology Trends](topic)
+    - Do you have anything about [Scientific Exploration and Innovation](topic)?
+    - What's new on [Social Media](topic)?
+
+
+- intent: provide_topic
   examples: |
-    - That was helpful
-    - That summary seems biased
-    - I think that was neutral
+    # Middle Eastern Crisis and its subtopics
+    - [Middle Eastern Crisis](topic)
+    - [Israel-Gaza War](topic)
+    - [Israel-Lebanon Conflict](topic)
+    - [University Campus Activism](topic)
+    - [Israel-Iran Conflict](topic)
+
+    # Democracy and its subtopics
+    - [Democracy](topic)
+    - [Voting Access/Rights](topic)
+    - [Fate of US Democracy](topic)
+    - [Election Security](topic)
+
+    # Crime and its subtopics
+    - [Crime](topic)
+    - [Violent Crime](topic)
+    - [Financial and Corporate Crime](topic)
+    - [Legal Proceedings](topic)
+    - [Police Misconduct](topic)
+    - [Cybercrime and Security Threats](topic)
+    - [Political Corruption](topic)
+    - [Terrorism](topic)
+    - [Sexual Misconduct](topic)
+    - [Drug-Related Crime](topic)
+
+    # Guns and its subtopics
+    - [Guns](topic)
+    - [Gun Legislation and Regulation](topic)
+    - [Gun Safety and Violence](topic)
+    - [Legal and Societal Implications of Guns](topic)
+    - [National Rifle Association (NRA)](topic)
+
+    # Immigration and its subtopics
+    - [Immigration](topic)
+    - [Border Security](topic)
+    - [Immigration Policy and Reform](topic)
+    - [Government Action](topic)
+    - [Asylum and Refugees](topic)
+    - [Migration Trends](topic)
+
+    # Russian-Ukraine War and its subtopics
+    - [Russian-Ukraine War](topic)
+    - [Russian Military Operations](topic)
+    - [Ukrainian Military Operations](topic)
+    - [Ceasefire Negotiations](topic)
+    - [US Foreign Aid](topic)
+
+    # Environment and its subtopics
+    - [Environment](topic)
+    - [Climate Change](topic)
+    - [Wildlife Conservation](topic)
+    - [Agriculture](topic)
+    - [Renewable Energy](topic)
+    - [Government Regulation](topic)
+
+    # Taxes and its subtopics
+    - [Taxes](topic)
+    - [Tax Policy and Legislation](topic)
+    - [IRS and Tax Compliance](topic)
+    - [Personal Taxes](topic)
+    - [Corporate Taxes](topic)
+
+    # Education and its subtopics
+    - [Education](topic)
+    - [Diversity and Inclusion](topic)
+    - [Student Loans](topic)
+    - [Higher Education Policies and Leadership](topic)
+    - [Technology and Modern Learning](topic)
+    - [Academic Integrity](topic)
+
+    # Trump Legal Troubles and its subtopics
+    - [Trump Legal Troubles](topic)
+    - [Jan. 6 Riot](topic)
+    - [Supreme Court and Presidential Immunity](topic)
+    - [Civil Fraud Trial](topic)
+    - [Asset Inflation Case](topic)
+    - [Election Subversion Trial](topic)
+    - [Classified Material Case](topic)
+    - [Hush-Money Scheme](topic)
+    - [Real Estate Lawsuits](topic)
+    - [Business Tax Disputes](topic)
+
+    # 2024 Election and its subtopics
+    - [2024 Election](topic)
+    - [Presidential Horse Race](topic)
+    - [Senate Horse Race](topic)
+    - [House Horse Race](topic)
+    - [Governor Horse Race](topic)
+    - [Biden's Age](topic)
+    - [Kamala Harris Campaign](topic)
+    - [Voter Concerns](topic)
+
+    # Foreign Policy and its subtopics
+    - [Foreign Policy](topic)
+    - [China](topic)
+    - [Middle East](topic)
+    - [European Union](topic)
+    - [Africa](topic)
+    - [NATO](topic)
+    - [Latin America](topic)
+
+    # Politician and its subtopics
+    - [Politician](topic)
+    - [US House Representative](topic)
+    - [US Senator](topic)
+    - [State Governor](topic)
+    - [US State Official](topic)
+    - [Non-US Political Official](topic)
+
+    # Reproductive Rights and its subtopics
+    - [Reproductive Rights](topic)
+    - [Abortion Regulation](topic)
+    - [Abortion and Politics](topic)
+    - [Abortion Advocacy and Activism](topic)
+    - [Birth Control](topic)
+    - [Fertility Treatment](topic)
+
+    # Healthcare and its subtopics
+    - [Healthcare](topic)
+    - [Health Insurance](topic)
+    - [Medical Malpractice](topic)
+    - [Government Regulation](topic)
+
+    # LGBTQ and its subtopics
+    - [LGBTQ](topic)
+    - [Transgender Rights](topic)
+    - [Christian Church Divide](topic)
+
+    # Transportation and its subtopics
+    - [Transportation](topic)
+    - [Public Transit](topic)
+    - [Transportation Safety](topic)
+
+    # Animals and its subtopics
+    - [Animals](topic)
+    - [Animal Behavior](topic)
+    - [Animal Welfare](topic)
+
+    # Arts and Entertainment and its subtopics
+    - [Arts and Entertainment](topic)
+    - [Art Industry](topic)
+    - [Award Show](topic)
+    - [TV Industry](topic)
+    - [Literature](topic)
+    - [Film/Movie Industry](topic)
+    - [Fashion Industry](topic)
+    - [Music Industry](topic)
+
+    # Celebrity and its subtopics
+    - [Celebrity](topic)
+    - [Taylor Swift](topic)
+    - [Celebrity Relationship](topic)
+    - [Celebrity Scandal](topic)
+    - [Royal Family](topic)
+
+    # Home and Lifestyle and its subtopics
+    - [Home and Lifestyle](topic)
+    - [Food and Cooking](topic)
+    - [Home Improvement](topic)
+
+    # Travel and Tourism and its subtopics
+    - [Travel and Tourism](topic)
+    - [Travel Tips](topic)
+
+    # Religion and its subtopics
+    - [Religion](topic)
+    - [Religious Leaders and Influence](topic)
+    - [Religion and Social Issues](topic)
+
+    # Holidays and its subtopics
+    - [Holidays](topic)
+    - [Gift Ideas](topic)
+    - [Holiday Hours](topic)
+
+    # Business - Corporate Strategy and its subtopics
+    - [Business - Corporate Strategy](topic)
+    - [Mergers and Acquisitions](topic)
+    - [Financial Restructuring](topic)
+    - [Company Performance](topic)
+
+    # Business - Industry Developments and its subtopics
+    - [Business - Industry Developments](topic)
+    - [Electric Vehicle Industry](topic)
+    - [Retail Industry](topic)
+    - [Media Industry](topic)
+    - [Tech Industry](topic)
+
+    # Health and Wellness and its subtopics
+    - [Health and Wellness](topic)
+    - [COVID-19](topic)
+    - [Nutrition and Diet](topic)
+    - [Exercise](topic)
+    - [Skincare](topic)
+    - [Sleep](topic)
+    - [Drugs and Alcohol](topic)
+    - [Mental Health ](topic)
+
+    # Man-Made Disaster and its subtopics
+    - [Man-Made Disaster](topic)
+    - [Airplane Crash](topic)
+    - [Car Accident](topic)
+
+    # Weather and Natural Disaster and its subtopics
+    - [Weather and Natural Disaster](topic)
+    - [Earthquake](topic)
+    - [Heat Wave](topic)
+    - [Hurricane](topic)
+    - [Wildfire](topic)
+    - [Snow Storm](topic)
+    - [Flooding](topic)
+
+    # US Economy and its subtopics
+    - [US Economy](topic)
+    - [Inflation and Prices](topic)
+    - [Monetary Policy](topic)
+    - [Stock Market](topic)
+    - [Government Spending](topic)
+    - [Employment and Wages](topic)
+    - [Housing Market](topic)
+    - [Consumer Activity](topic)
+    - [Trade](topic)
+    - [Financial Oversight](topic)
+
+    # Non-US Economy and its subtopics
+    - [Non-US Economy](topic)
+    - [China Economy](topic)
+    - [Europe Economy](topic)
+    - [Global Economy](topic)
+
+    # Sports - Baseball and its subtopics
+    - [Sports - Baseball](topic)
+    - [MLB](topic)
+
+    # Sports - Basketball and its subtopics
+    - [Sports - Basketball](topic)
+    - [NBA](topic)
+    - [Men's College Basketball](topic)
+    - [Women's College Basketball](topic)
+    - [WNBA](topic)
+
+    # Sports - Football and its subtopics
+    - [Sports - Football](topic)
+    - [NFL](topic)
+    - [College Football](topic)
+
+    # Sports - Other and its subtopics
+    - [Sports - Other](topic)
+    - [NHL](topic)
+    - [Soccer](topic)
+    - [2024 Olympics](topic)
+    - [Golf](topic)
+    - [Tennis](topic)
+    - [Boxing](topic)
+
+    # Science  and its subtopics
+    - [Science ](topic)
+    - [Astronomy ](topic)
+    - [Paleoanthropology ](topic)
+
+    # Technology and its subtopics
+    - [Technology](topic)
+    - [Artificial Intelligence (AI)](topic)
+    - [Cybersecurity and Privacy](topic)
+    - [Smartphone Technology](topic)
+    - [Space and Aerospace Technologies](topic)
+    - [Electric Vehicles](topic)
+    - [Digital Media and Advertising](topic)
+    - [Consumer Technology Trends](topic)
+    - [Scientific Exploration and Innovation](topic)
+    - [Social Media](topic)
