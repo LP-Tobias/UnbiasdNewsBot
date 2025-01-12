@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
+import json
 import requests
 import logging
 from typing import Any, Text, Dict, List
@@ -20,6 +21,10 @@ from Dbias.text_debiasing import *
 from Dbias.bias_classification import *
 from Dbias.bias_recognition import *
 from Dbias.bias_masking import *
+
+from newspaper import Article
+
+from .topics import topic_list, subtopic_dict
 
 logger = logging.getLogger(__name__)
 
@@ -47,17 +52,11 @@ class ActionFetchNews(Action):
             dispatcher.utter_message(text="Please specify a topic for news.")
             return []
 
-        n_news = int(n_news) if n_news else 1  # Default to 1
-
-        # Initialize NewsAPI client
+        n_news = int(n_news)
         newsapi = NewsApiClient(api_key=NEWS_API_KEY)
 
         try:
-            response = newsapi.get_everything(
-                q=topic,
-                language="en",
-                page_size=int(n_news)
-            )
+            response = newsapi.get_everything(q=topic, language="en", page_size=n_news)
         except Exception as e:
             dispatcher.utter_message(text=f"Error fetching news: {e}")
             return []
@@ -73,15 +72,28 @@ class ActionFetchNews(Action):
 
         dispatcher.utter_message(text=f"Here are the latest {len(articles)} articles I found:")
 
-        # Collect articles as structured data
         structured_articles = []
 
         for idx, article in enumerate(articles, start=1):
+            url = article.get("url", "")
+            full_content = "Content not available."
+
+            if url:
+                try:
+                    news_article = Article(url)
+                    news_article.download()
+                    news_article.parse()
+                    full_content = news_article.text
+                except Exception as e:
+                    full_content = "Unable to fetch full content."
+                    print(f"Error fetching full content for {url}: {e}")
+
             structured_articles.append({
                 "title": article.get("title", "Untitled"),
                 "description": article.get("description", ""),
-                "content": article.get("content", ""),
-                "source": article.get("source", {}).get("name", "Unknown Source")
+                "content": full_content,
+                "source": article.get("source", {}).get("name", "Unknown Source"),
+                "url": url
             })
 
             dispatcher.utter_message(
@@ -90,15 +102,90 @@ class ActionFetchNews(Action):
                     f"Title: {structured_articles[-1]['title']}\n"
                     f"Source: {structured_articles[-1]['source']}\n"
                     f"Description: {structured_articles[-1]['description']}\n"
-                    f"Content: {structured_articles[-1]['content']}\n"
+                    f"Full Content: {structured_articles[-1]['content'][:500]}...\n"
+                    f"Read more: {url}\n"
                 )
             )
 
-        # Store structured data as JSON in the slot
         return [{"event": "slot", "name": "news_fetched", "value": structured_articles}]
 
+"""
+# Back up incase newspaper3k stop working.
+
+# class ActionFetchNews(Action):
+#     def name(self) -> Text:
+#         return "action_fetch_news"
+
+#     async def run(
+#         self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]
+#     ) -> List[Dict[Text, Any]]:
+
+#         topic = tracker.get_slot("topic")
+#         n_news = tracker.get_slot("n_news")
+
+#         if not n_news:
+#             n_news = 1
+
+#         if not topic:
+#             dispatcher.utter_message(text="Please specify a topic for news.")
+#             return []
+
+#         n_news = int(n_news) if n_news else 1  # Default to 1
+
+#         # Initialize NewsAPI client
+#         newsapi = NewsApiClient(api_key=NEWS_API_KEY)
+
+#         try:
+#             response = newsapi.get_everything(
+#                 q=topic,
+#                 language="en",
+#                 page_size=int(n_news)
+#             )
+#         except Exception as e:
+#             dispatcher.utter_message(text=f"Error fetching news: {e}")
+#             return []
+
+#         if response.get("status") != "ok":
+#             dispatcher.utter_message(text="I encountered an error fetching the news.")
+#             return []
+
+#         articles = response.get("articles", [])
+#         if not articles:
+#             dispatcher.utter_message(text="I didn't find relevant news on that topic.")
+#             return []
+
+#         dispatcher.utter_message(text=f"Here are the latest {len(articles)} articles I found:")
+
+#         # Collect articles as structured data
+#         structured_articles = []
+
+#         #TODO: In the distribution product, hide the content, provide a link to the article
+
+#         for idx, article in enumerate(articles, start=1):
+#             structured_articles.append({
+#                 "title": article.get("title", "Untitled"),
+#                 "description": article.get("description", ""),
+#                 "content": article.get("content", ""),
+#                 "source": article.get("source", {}).get("name", "Unknown Source")
+#             })
+
+#             dispatcher.utter_message(
+#                 text=(
+#                     f"**Article {idx}:**\n"
+#                     f"Title: {structured_articles[-1]['title']}\n"
+#                     f"Source: {structured_articles[-1]['source']}\n"
+#                     f"Description: {structured_articles[-1]['description']}\n"
+#                     f"Content: {structured_articles[-1]['content']}\n"
+#                 )
+#             )
+
+#         # Store structured data as JSON in the slot
+#         return [{"event": "slot", "name": "news_fetched", "value": structured_articles}]
+"""
 
 class ActionSummarizeNews(Action):
+    """Summarize the fetched news articles using GPT-3.5-turbo. Remain factual."""
+
     def name(self) -> Text:
         return "action_summarize_news"
 
@@ -139,13 +226,13 @@ class ActionSummarizeNews(Action):
             summary = response["choices"][0]["message"]["content"]
             summaries.append(summary)
 
-            dispatcher.utter_message(text=f"**Summary of Article {idx}:**\n{summary}")
+            dispatcher.utter_message(text=f"**Here is GPT3.5's Concise Summary of Article {idx}:**\n{summary}")
 
         return [{"event": "slot", "name": "news_summary", "value": summaries}]
     
 
 class ActionBiasDetectionSummary(Action):
-    """Detect bias in the summarized news content."""
+    """Dbias classification score in the summarized news content."""
 
     def name(self) -> Text:
         return "action_bias_detection_summary"
@@ -174,7 +261,7 @@ class ActionBiasDetectionSummary(Action):
             bias_results.append(bias_result)
 
             dispatcher.utter_message(
-                text=f"**Bias Analysis of Summary {idx}:**\n{bias_result}"
+                text=f"**Bias Score of Concise Summary {idx}:**\n{bias_result}"
             )
 
         # Store bias results in a slot
@@ -182,7 +269,8 @@ class ActionBiasDetectionSummary(Action):
 
 
 class ActionBiasRecognitionSummary(Action):
-    """Recognize biased words in the summarized news content."""
+    """Dbias recognize biased words in the summarized news content."""
+    #TODO: The detected word can be further intriduced into the final LLM debiasing process.
 
     def name(self) -> Text:
         return "action_bias_recognition_summary"
@@ -231,7 +319,7 @@ class ActionBiasRecognitionSummary(Action):
 
 
 class ActionDbiasSummary(Action):
-    """Debias the summarized news content (Method 1) using custom debiasing."""
+    """Debias the summarized news content (Method 1) using method in Dbias."""
 
     def name(self) -> Text:
         return "action_dbias_summary"
@@ -272,7 +360,7 @@ class ActionDbiasSummary(Action):
             # Provide feedback to the user
             if debiased_text.strip():
                 dispatcher.utter_message(
-                    text=f"**Debiased Summary {idx}:**\n{debiased_text}"
+                    text=f"**Debiased Summary processed by Dbias {idx}:**\n{debiased_text}"
                 )
             else:
                 dispatcher.utter_message(
@@ -289,7 +377,7 @@ class ActionDbiasSummary(Action):
     
 
 class ActionLlmDebiasSummary(Action):
-    """Debias multiple summarized news articles using LLM with Chain-of-Thought reasoning."""
+    """Debias multiple summarized news articles using LLM with prompts. (Method 2) """
 
     def name(self) -> Text:
         return "action_llm_debias_summary"
@@ -338,7 +426,7 @@ class ActionLlmDebiasSummary(Action):
 
                 # Provide feedback to the user for each debiased summary
                 dispatcher.utter_message(
-                    text=f"**Debiased Summary {idx}:**\n{debiased_text}"
+                    text=f"**Single LLM Prompting Debiased Summary {idx}:**\n{debiased_text}"
                 )
 
                 # Collect the debiased summary
@@ -355,7 +443,6 @@ class ActionLlmDebiasSummary(Action):
 
         # Store all debiased summaries in a slot
         return [{"event": "slot", "name": "LLM_debias_summary", "value": debiased_summaries}]
-
 
 
 class ActionLlmSummaryBiasDetection(Action):
@@ -385,13 +472,13 @@ class ActionLlmSummaryBiasDetection(Action):
 
         for idx, summary in enumerate(summaries, start=1):
             try:
-                summary_text = summary.get('original_summary')
+                summary_text = summary.get('debiased_summary')
                 # Detect bias using the classifier
                 bias_result = classifier(summary_text)
                 
                 # Provide feedback to the user for each summary
                 dispatcher.utter_message(
-                    text=f"**Bias Detection for Summary {idx}:** {bias_result}"
+                    text=f"**Bias Score for Single-LLM-Prompting Summary {idx}:**\n{bias_result}"
                 )
 
                 # Collect the bias detection results
@@ -408,84 +495,451 @@ class ActionLlmSummaryBiasDetection(Action):
         # Store the bias detection results in a slot
         return [
             {"event": "slot", "name": "LLM_summary_score", "value": bias_results}
-            # ActionExecuted("action_listen"),
-            # SlotSet("news_summary", None),
-            # SlotSet("summary_bias", None),
-            # AllSlotsReset(),
-            # ActionExecuted("action_listen")
         ]
-
-
-# class ActionBiasDetection(Action):
-#     """Use Dbias package to detect biases in the news content and print biased words."""
-
-#     def name(self) -> Text:
-#         return "action_bias_detection"
     
-#     def run(self, dispatcher: CollectingDispatcher,
-#             tracker: Tracker,
-#             domain: DomainDict) -> List[Dict[Text, Any]]:
-        
-#         # Get the news content
-#         news_text = tracker.get_slot("news_fetched")
-#         if not news_text:
-#             dispatcher.utter_message(text="I don't have news to analyze.")
-#             return []
 
-#         try:
-#             # Use the Dbias package to classify the bias
-#             bias = classifier(news_text)
-#             dispatcher.utter_message(text=f"The news content is classified as: {bias}")
-
-#             # Recognize biased words in the news content
-#             biased_words = recognizer(news_text)
-#             if biased_words:
-#                 biased_words_list = [word['entity'] for word in biased_words]
-#                 biased_words_text = ", ".join(biased_words_list)
-#                 dispatcher.utter_message(text=f"Identified biased words: {biased_words_text}")
-#             else:
-#                 dispatcher.utter_message(text="No biased words were detected.")
-        
-#         except Exception as e:
-#             dispatcher.utter_message(text=f"An error occurred during bias detection: {e}")
-#             return []
-
-#         # Optionally, store the bias and biased words in slots
-#         # return [
-#         #     {"event": "slot", "name": "news_bias", "value": bias},
-#         #     {"event": "slot", "name": "biased_words", "value": biased_words_text}
-#         # ]
-        
-#         return []
-
-class ActionBiasRecognition(Action):
-    """Use Dbias package to recognize biases in the news content."""
+class ActionLlmAnalysis(Action):
+    """This comes after News Fetch, refer to mediabiasdetector"""
 
     def name(self) -> Text:
-        return "action_bias_recognition"
+        return "action_llm_analysis"
     
+    def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict
+    ) -> List[Dict[Text, Any]]:
+
+        news_articles = tracker.get_slot("news_fetched")
+        if not news_articles:
+            dispatcher.utter_message(text="I don't have news to summarize.")
+            return []
+
+        # Helper function to call OpenAI ChatCompletion
+        def openai_chat(prompt: str, model: str = "gpt-3.5-turbo") -> Dict:
+            """
+            Sends the prompt to OpenAI ChatCompletion and returns a parsed dictionary of the JSON response.
+            NOTE: We assume the LLM's response is strictly valid JSON. 
+                  You may want additional error handling if the response is not well-formed JSON.
+            """
+            try:
+                response = openai.ChatCompletion.create(
+                    model=model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are a helpful assistant. "
+                                "The user will provide a news article and instructions to return only valid JSON. "
+                                "Follow the instructions exactly."
+                            )
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    temperature=0.0
+                )
+                response_text = response["choices"][0]["message"]["content"].strip()
+                return json.loads(response_text)
+            except json.JSONDecodeError:
+                # If JSON parsing fails, return an empty dict or handle as needed
+                return {}
+            except Exception as e:
+                # Generic error handling
+                print(f"OpenAI API call error: {e}")
+                return {}
+
+        # We'll store results in a list of dictionaries, one dict per article
+        analysis_results = []
+
+        for article_data in news_articles:
+            # We'll assume each item has 'title' and 'body'
+            article_title = article_data.get("title", "")
+            article_body = article_data.get("content", "")
+
+            # 1) Analyze the takeaways
+            takeaways_prompt = f"""
+            The following is a news article. Read it and perform the task that follows. Respond with a JSON object of key-value pairs.
+
+            ####################
+
+            {article_body}
+
+            ####################
+
+            Task: Summarize the main points of the news article.
+
+            Instruction: List short takeaway points that readers are likely to remember from the article.
+            Key: "takeaways"
+            Value: A 3-4 sentence summary.
+            """
+            parsed_takeaways = openai_chat(takeaways_prompt, model="gpt-4o")
+
+            # 2) Analyze the Category/Topic
+            topic_prompt = f"""
+            The following is a news article. Read it and perform the task that follows. Respond with a JSON object of key-value pairs.
+
+            ####################
+
+            {article_body}
+
+            ####################
+
+            Task: Classify the article into one of the listed topics.
+
+            Instruction: Try your best to bucket the article into one of these topics. DO NOT write anything that is not listed.
+            Key: "topic"
+            Value: One of: {topic_list}.
+
+            Do not return anything except the JSON object of key-value pairs as output.
+            """
+            parsed_topic = openai_chat(topic_prompt, model="gpt-3.5-turbo")
+            predicted_topic = parsed_topic.get("topic", "")
+
+            # 2b) Analyze the subtopic
+            subtopic_prompt = f"""
+            The following is a news article on the topic of {predicted_topic}. Read it and perform the task that follows. 
+            Respond with a JSON object of key-value pairs.
+
+            ####################
+
+            {article_body}
+
+            ####################
+
+            Task: Classify the article into one of the listed subtopics under the predicted topic.
+
+            Instruction: Try your best to bucket the article into one of these subtopics. Label it as 'Other' if the article does not fit any possible subtopics.
+            Key: "subtopic"
+            Value: One of {subtopic_dict}.
+
+            Do not return anything except the JSON object of key-value pairs as output.
+            """
+            parsed_subtopic = openai_chat(subtopic_prompt, model="gpt-3.5-turbo")
+
+            # 3) Analyze News Type
+            news_type_prompt = f"""
+            The following is a news article. Read it and perform the task that follows. Respond with a JSON object of key-value pairs.
+
+            ####################
+
+            {article_body}
+
+            ####################
+
+            Task: Determine the news type of this news article.
+
+            1. Instruction: Classify the above news article into one of three categories: news report, news analysis, or opinion. Each category has distinct characteristics:
+            - News Report: Objective reporting on recent events, focusing on verified facts without the writer's personal views.
+            - News Analysis: In-depth examination and interpretation of news events, providing context and explaining significance, while maintaining a degree of objectivity.
+            - Opinion: Articles reflecting personal views, arguments, or beliefs on current issues, often persuasive and subjective.
+            Consider criteria such as language objectivity, focus on facts versus interpretation, author's intent, and article structure. 
+            Key: "news_type"
+            Value: One of "news report" or "news analysis" or "opinion".
+
+
+            2. Instruction: Provide a short paragraph to justify your classification, citing specific elements from the text.
+            Key: "justification"
+            Value: A paragraph of text.
+
+            Do not return anything except the JSON object of key-value pairs as output.
+            """
+            parsed_news_type = openai_chat(news_type_prompt, model="gpt-4o")
+
+            # 4) Analyze Article Tone
+            tone_prompt = f"""
+            The following is a news article. Read it and perform the task that follows. Respond with a JSON object of key-value pairs.
+
+            ####################
+
+            {article_body}
+
+            ####################
+
+            Task: Determine the overall tone of the article. Is it negative, positive, or neutral?
+
+            1. Instruction: Provide a short paragraph summarizing in what ways the article has a negative or positive tone.
+               Key: "reason"
+               Value: A paragraph of text.
+
+            2. Instruction: Provide a number from -5 to 5, with -5 indicating a very negative tone and 5 indicating a very positive tone.
+               A value of 0 indicates that the article has a neutral tone.
+               Key: "tone"
+               Value: An integer number from -5 to 5.
+
+            Do not return anything except the JSON object of key-value pairs as output.
+            """
+            parsed_tone = openai_chat(tone_prompt, model="gpt-4o")
+
+            # 4b) Analyze the Title Tone
+            title_tone_prompt = f"""
+            The following is the title of a news article on the topic of {predicted_topic} ({parsed_subtopic.get("subtopic","")}) in the {parsed_news_type.get("news_type","")} news category. 
+            Read it and perform the task that follows. Respond with a JSON object of key-value pairs.
+
+            ####################
+
+            {article_title}
+
+            ####################
+
+            Task: Determine the overall tone of the article title. Is it negative, positive, or neutral?
+
+            1. Instruction: Provide a short paragraph summarizing in what ways the article title has a negative or positive tone.
+               Key: "reason"
+               Value: A paragraph of text.
+
+            2. Instruction: Provide a number from -5 to 5, with -5 indicating a very negative tone and 5 indicating a very positive tone.
+               A value of 0 indicates that the article title has a neutral tone.
+               Key: "tone"
+               Value: An integer number from -5 to 5.
+
+            Do not return anything except the JSON object of key-value pairs as output.
+            """
+            parsed_title_tone = openai_chat(title_tone_prompt)
+
+            # 5) Analyze the Article Political Lean
+            political_lean_prompt = f"""
+            The following is a news article. Read it and perform the task that follows. Respond with a JSON object of key-value pairs.
+
+            ####################
+
+            {article_body}
+
+            ####################
+
+            Task: Determine the political leaning of this article within the U.S. political context. 
+            Is it supporting the Democrat party or the Republican party? Provide reasoning for your answer.
+
+            1. Instruction: Give a short paragraph summarizing in what ways the article supports the Democrat party or the Republican party.
+               Key: "reason"
+               Value: A paragraph of text.
+
+            2. Instruction: Give a number from -5 to 5, with -5 indicating strong support for Democrats and 5 indicating strong support for Republicans. 
+               A value of 0 indicates that the article has no clear political leaning towards either side.
+               Key: "lean"
+               Value: An integer number from -5 to 5.
+
+            Do not return anything except the JSON object of key-value pairs as output.
+            """
+            parsed_political_lean = openai_chat(political_lean_prompt)
+
+            # 5b) Analyze the Title Political Lean
+            title_political_prompt = f"""
+            The following is the title of a news article on the topic of {predicted_topic} ({parsed_subtopic.get("subtopic","")}) in the {parsed_news_type.get("news_type","")} news category.
+            Read it and perform the task that follows. Respond with a JSON object of key-value pairs.
+
+            ####################
+
+            {article_title}
+
+            ####################
+
+            Task: Determine the political leaning of this article title within the U.S. political context. 
+            Is it supporting the Democrat party or the Republican party? Supporting a party can mean supporting its viewpoints, politicians, or policies. Provide reasoning for your answer.
+
+            1. Instruction: Provide a short paragraph summarizing in what ways the article title supports the Democrat party or the Republican party.
+               Key: "reason"
+               Value: A paragraph of text.
+
+            2. Instruction: Provide a number from -5 to 5, with -5 indicating strong support for Democrats and 5 indicating strong support for Republicans. 
+               A value of 0 indicates that the article title has no clear political leaning towards either side.
+               Key: "lean"
+               Value: An integer number from -5 to 5.
+
+            Do not return anything except the JSON object of key-value pairs as output.
+            """
+            parsed_title_political_lean = openai_chat(title_political_prompt)
+
+            # Now combine everything into a single dictionary for this article
+            single_article_analysis = {
+                "title": article_title,
+                "body": article_body,
+                # Safe-guarding with .get to avoid KeyError if the JSON is missing keys
+                "takeaways": parsed_takeaways.get("takeaways"),
+                "topic": predicted_topic,
+                "subtopic": parsed_subtopic.get("subtopic"),
+                "news_type": parsed_news_type.get("news_type"),
+                "news_type_justification": parsed_news_type.get("justification"),
+                "article_tone_reason": parsed_tone.get("reason"),
+                "article_tone_score": parsed_tone.get("tone"),
+                "title_tone_reason": parsed_title_tone.get("reason"),
+                "title_tone_score": parsed_title_tone.get("tone"),
+                "political_reason": parsed_political_lean.get("reason"),
+                "political_lean": parsed_political_lean.get("lean"),
+                "title_political_reason": parsed_title_political_lean.get("reason"),
+                "title_political_lean": parsed_title_political_lean.get("lean"),
+            }
+
+            analysis_results.append(single_article_analysis)
+
+            # print the analysis
+            # dispatcher.utter_message(
+            #     text=f"Analysis for article: {article_title}\n{single_article_analysis}"
+            # )
+
+        # Store `analysis_results` in a slot, e.g., "analysis_results"
+        return [SlotSet("analysis_results", analysis_results)]
+    
+
+class ActionCotBiasDetection(Action):
+    """Refer to bias types, summarize the bias in the article."""
+    
+    def name(self) -> Text:
+        return "action_cot_bias_detection"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        # Retrieve the news articles from the slot
+        news_articles = tracker.get_slot("news_fetched")
+
+        if not news_articles:
+            dispatcher.utter_message(text="I don't have any news articles to analyze.")
+            return []
+
+        # Ensure articles are in a list format
+        articles = news_articles if isinstance(news_articles, list) else [news_articles]
+
+        # Load bias types
+        with open("bias_types.json", "r") as f:
+            bias_types = json.load(f)
+
+        # Prepare bias types summary for GPT prompt
+        bias_summary = "\n".join([
+            f"{bias['bias_name']}: {bias['description']}" for bias in bias_types
+        ])
+
+        bias_results = []
+
+        for idx, article in enumerate(articles, start=1):
+            content = article.get("content", "")
+            title = article.get("title", "Untitled")
+
+            # Chat-based prompt structure
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant trained to detect bias in news articles."},
+                {"role": "user", "content": (
+                    f"Analyze the following news article for any signs of bias based on these definitions:\n"
+                    f"{bias_summary}\n\n"
+                    f"Article Title: {title}\n"
+                    f"Content: {content}\n\n"
+                    f"Please identify and explain any biases detected in the article."
+                )}
+            ]
+
+            try:
+                # Correct OpenAI API call
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",  # or "gpt-4"
+                    messages=messages,
+                    temperature=0.5
+                    # max_tokens=500
+                )
+
+                analysis = response.choices[0].message["content"].strip()
+                result = (
+                    f"**Article {idx}:**\n"
+                    f"Title: {title}\n"
+                    f"Detected Biases: {analysis}\n"
+                )
+            except Exception as e:
+                result = (
+                    f"**Article {idx}:**\n"
+                    f"Title: {title}\n"
+                    f"Error analyzing bias: {e}"
+                )
+
+            bias_results.append(result)
+            # dispatcher.utter_message(text=result)
+
+        return [SlotSet("cot_bias_detection", bias_results)]
+
+
+class ActionCotDebiasSummary(Action):
+    """Debias multiple summarized news articles using CoT. (Method 3)"""
+
+    def name(self) -> Text:
+        return "action_cot_debias_summary"
+
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: DomainDict) -> List[Dict[Text, Any]]:
-        
-        news_text = tracker.get_slot("news_fetched")
-        if not news_text:
-            dispatcher.utter_message(text="I don't have news to analyze.")
+
+        articles = tracker.get_slot("news_fetched")
+        analysis_results = tracker.get_slot("analysis_results")
+        bias_detections = tracker.get_slot("cot_bias_detection")
+
+        if not articles:
+            dispatcher.utter_message(text="I don't have any summaries to debias.")
             return []
-        
-        def custom_recognizer(x):
-            biased_words = recognizer(x)
-            biased_words_list = []
-            for id in range(0, len(biased_words)):
-                biased_words_list.append(biased_words[id]['entity'])
-            return ", ".join(biased_words_list)
-        
-        biased_words_list_out = custom_recognizer(news_text)
-        dispatcher.utter_message(text=f"These are the biased words: {biased_words_list_out}")
-        
-        # Use a slot to save the biased words list for LLM debias.
-        return[]
-        
+
+        debiased_summaries = []
+
+        for idx, article in enumerate(articles, start=1):
+            title = article.get("title", "")
+            content = article.get("content", "")
+            analysis = analysis_results[idx - 1] if analysis_results and idx - 1 < len(analysis_results) else {}
+            bias_detection = bias_detections[idx - 1] if bias_detections and idx - 1 < len(bias_detections) else ""
+
+            # Prepare system and user prompts
+            system_prompt = (
+                "You are a professional news editor specialized in unbiased summariation. "
+                "Your task is to summarize news articles by eliminating biases while maintaining factual accuracy and clarity."
+                # "Try to aviod using biased words in the summary."
+                # "If possible, make it 3-4 sentences long. User-reading friendly."
+            )
+
+            user_prompt = (
+                f"**Title:** {title}\n\n"
+                f"**Content:** {content}\n\n"
+                f"**Detected Biases:** {bias_detection}\n\n"
+                f"**Analysis:** {analysis.get('body', '')}\n\n"
+                "Summarize the article to remove any potential biases or subjective language while preserving the core message."
+            )
+
+            try:
+                # Call the OpenAI API for debiasing
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",
+                    temperature=0.3,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ]
+                )
+
+                debiased_text = response["choices"][0]["message"]["content"].strip()
+
+                # Provide feedback to the user
+                dispatcher.utter_message(
+                    text=f"**CoT Debiased Summary {idx}:**\n{debiased_text}"
+                )
+
+                # Collect debiased summaries
+                debiased_summaries.append({
+                    "summary_index": idx,
+                    "original_title": title,
+                    # "original_content": content,
+                    "debiased_summary": debiased_text
+                })
+
+            except Exception as e:
+                dispatcher.utter_message(
+                    text=f"An error occurred while debiasing summary {idx}: {e}"
+                )
+            
+            # use classifier to check if the debiased text is biased
+            bias_result = classifier(debiased_text)
+            dispatcher.utter_message(
+                text=f"**Bias Score of CoT Debiased Summary {idx}:**\n{bias_result}"
+            )
+
+        # Store debiased summaries in slot
+        return [SlotSet("cot_debias_summary", debiased_summaries)]
 
 
 class ActionPerspectiveFeedback(Action):
@@ -579,6 +1033,7 @@ class ActionDefaultFallback(Action):
         dispatcher.utter_message(text="❓ I'm sorry, I didn't understand that. Can you rephrase?")
         return [AllSlotsReset(), ActionExecuted("action_listen")]
 
+
 class ActionResetSlots(Action):
     def name(self) -> Text:
         return "action_reset_slots"
@@ -589,5 +1044,4 @@ class ActionResetSlots(Action):
         
         dispatcher.utter_message(text="✅ I'm ready for your next request!")
         return [AllSlotsReset(), ActionExecuted("action_listen")]
-
 

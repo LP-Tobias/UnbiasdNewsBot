@@ -19,6 +19,163 @@
     const messagesDiv = document.getElementById("messages");
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
+    let messageCount = 0;
+
+    sendBtn.addEventListener("click", sendMessage);
+    userInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
+
+    function sendMessage() {
+        const message = userInput.value.trim();
+        if (message === "") return;
+
+        appendMessage(message, "user");
+        userInput.value = "";
+
+        fetch("http://localhost:5000/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const combinedBotReply = data.messages.join("\n\n");
+            appendMessage(combinedBotReply, "bot");
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    function appendMessage(message, sender) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `message ${sender}`;
+
+        if (sender === "bot" && message.includes("**Article")) {
+            msgDiv.innerHTML = formatBotMessage(message, messageCount);
+            messageCount++;
+        } else {
+            msgDiv.innerText = message;
+        }
+
+        messagesDiv.appendChild(msgDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function formatBotMessage(message, msgBatch) {
+        const articles = extractArticles(message);
+        const summaries = extractSummaries(message);
+
+        return articles.map((article, index) => {
+            const articleNum = index + 1;
+            const uniqueIndex = `msg${msgBatch}-art${articleNum}`;
+
+            return `
+                <div class="article-card">
+                    <h3>📰 ${article.title}</h3>
+                    <p><strong>Source:</strong> ${article.source}</p>
+                    <p>${article.description}</p>
+
+                    <button class="collapse-btn" onclick="toggleCollapse('concise-${uniqueIndex}')">📄 Concise Summary</button>
+                    <div id="concise-${uniqueIndex}" class="collapse-content">
+                        ${summaries.concise[articleNum] || "No Concise Summary Available"}
+                        ${formatBiasScore(summaries.conciseBias[articleNum])}
+                    </div>
+
+                    <button class="collapse-btn" onclick="toggleCollapse('singlellm-${uniqueIndex}')">📝 Single LLM Debiased Summary</button>
+                    <div id="singlellm-${uniqueIndex}" class="collapse-content">
+                        ${summaries.singleLLM[articleNum] || "No Single LLM Debiased Summary Available"}
+                        ${formatBiasScore(summaries.singleLLMBias[articleNum])}
+                    </div>
+
+                    <button class="collapse-btn" onclick="toggleCollapse('cot-${uniqueIndex}')">🛡️ CoT Debiased Summary</button>
+                    <div id="cot-${uniqueIndex}" class="collapse-content">
+                        ${summaries.cot[articleNum] || "No CoT Summary Available"}
+                        ${formatBiasScore(summaries.cotBias[articleNum])}
+                    </div>
+
+                    <a href="${article.link}" target="_blank">🔗 Read Full Article</a>
+                </div>
+            `;
+        }).join("");
+    }
+
+    function extractArticles(message) {
+        const articleRegex = /\*\*Article (\d+):\*\*\nTitle: (.+)\nSource: (.+)\nDescription: (.+)\n[\s\S]+?Read more: (.+)/g;
+        let match, articles = [];
+        while ((match = articleRegex.exec(message)) !== null) {
+            articles.push({
+                title: match[2],
+                source: match[3],
+                description: match[4],
+                link: match[5]
+            });
+        }
+        return articles;
+    }
+
+    function extractSummaries(message) {
+        const extract = (regex) => {
+            let match, summaries = {};
+            while ((match = regex.exec(message)) !== null) {
+                summaries[match[1]] = match[2];
+            }
+            return summaries;
+        };
+
+        return {
+            concise: extract(/\*\*Here is GPT3.5's Concise Summary of Article (\d+):\*\*\n([\s\S]*?)\n(?=\*\*|$)/g),
+            conciseBias: extract(/\*\*Bias Score of Concise Summary (\d+):\*\*\n(\[.+?\])/g),
+            singleLLM: extract(/\*\*Single LLM Prompting Debiased Summary (\d+):\*\*\n([\s\S]*?)\n(?=\*\*|$)/g),
+            singleLLMBias: extract(/\*\*Bias Score for Single-LLM-Prompting Summary (\d+):\*\*\n(\[.+?\])/g),
+            cot: extract(/\*\*CoT Debiased Summary (\d+):\*\*\n([\s\S]*?)\n(?=\*\*|$)/g),
+            cotBias: extract(/\*\*Bias Score of CoT Debiased Summary (\d+):\*\*\n(\[.+?\])/g),
+        };
+    }
+
+    function formatBiasScore(biasData) {
+        if (!biasData) return "";
+        const biasObj = JSON.parse(biasData.replace(/'/g, '"'))[0];
+        const label = biasObj.label;
+        const score = parseFloat(biasObj.score).toFixed(2);
+        const biasClass = label === "Non-biased" ? "non-biased" : "biased";
+        return `<p><span class="bias-tag ${biasClass}">${label} (Score: ${score})</span></p>`;
+    }
+
+    function toggleCollapse(id) {
+        const content = document.getElementById(id);
+        content.style.display = content.style.display === "block" ? "none" : "block";
+    }
+</script>
+
+</body>
+</html>
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat with Rasa Bot</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div id="chatbox">
+    <div id="messages"></div>
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="Type your message..." autofocus>
+        <button id="send-btn">➤</button>
+    </div>
+</div>
+
+<script>
+    const messagesDiv = document.getElementById("messages");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
 
     sendBtn.addEventListener("click", sendMessage);
     userInput.addEventListener("keypress", function (e) {
@@ -62,4 +219,4 @@
 </script>
 
 </body>
-</html>
+</html> -->

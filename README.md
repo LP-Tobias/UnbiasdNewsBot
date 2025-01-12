@@ -19,27 +19,6 @@ A Rasa-based chatbot designed to fetch news, detect and mitigate biases in artic
 └── requirements.txt      # Python dependencies
 ```
 
-## Current Progress
-
-**Log — 1/1/2025 (Peiheng)**  
-- Implemented basic stories and actions for core functionality (fetching news, summarizing, etc.).  
-
-## To-Do List
-
-1. **Expand NLU & Stories**  
-   - Add more training examples in `nlu.yml` and more stories in `stories.yml` so the bot can handle a wider range of user inputs.  
-
-2. **Improve Bias Detection**  
-   - Implement a more sophisticated approach to identify and handle biased terms in the news (possibly via LLM prompts or specialized libraries).  
-
-3. **Enhance Chain of Thought (CoT)**  
-   - Refine the action logic to better illustrate the step-by-step reasoning in debiasing.  
-
-4. **Showcase Debiasing Effect**  
-   - Provide clearer before-and-after examples to demonstrate how the bot reduces bias in its summaries.  
-
-5. **Integrate a Flask App**  
-   - Wrap the current Rasa chatbot inside a Flask application for web deployment or further expansions (e.g., custom UI, additional endpoints).
 
 ## Getting Started
 
@@ -62,3 +41,24 @@ A Rasa-based chatbot designed to fetch news, detect and mitigate biases in artic
      ```bash
      rasa run actions
      ```
+
+## Usage
+
+- **Request News**: Ask the bot to fetch news on a specific topic.
+  ```plaintext
+  User: I want news about technology.
+  Bot: Here are the latest news articles about technology...
+  ```
+
+- **Detect Bias**: The bot will analyze the fetched news for biases and provide a summary.
+  ```plaintext
+  User: Summarize the news.
+  Bot: The summary of the news articles is...
+  ```
+
+## Troubleshooting
+
+- **Contradicting Rules or Stories**: If you encounter errors related to contradicting rules or stories, ensure that your `rules.yml` and `stories.yml` files are consistent and do not conflict with each other.
+
+- **API Key Issues**: Ensure that your API keys are correctly set in the `.env` file and that they have the necessary permissions.
+

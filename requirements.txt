@@ -5,6 +5,7 @@ openai == 0.28
 requests
 python-dotenv
 newsapi-python
+newspaper3k
 
 # These two require a mannual installation
 # Dbias
