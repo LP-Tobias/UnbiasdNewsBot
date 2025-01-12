@@ -23,6 +23,7 @@ A Rasa-based chatbot designed to fetch news, detect and mitigate biases in artic
 ## Getting Started
 
 1. **Install Dependencies**  
+Please also read the instructions in the requirements.
    ```bash
    pip install -r requirements.txt
    ```
@@ -35,30 +36,21 @@ A Rasa-based chatbot designed to fetch news, detect and mitigate biases in artic
 4. **Run the Bot**  
    - In one terminal, start the Rasa server:
      ```bash
-     rasa shell
+      rasa run --enable-api --cors "*" --debug
      ```
    - In another terminal, launch the action server:
      ```bash
      rasa run actions
      ```
+   - In the last terminal, launch Flask:
+     ```bash
+     python app.py
+     ```
 
 ## Usage
 
-- **Request News**: Ask the bot to fetch news on a specific topic.
-  ```plaintext
-  User: I want news about technology.
-  Bot: Here are the latest news articles about technology...
-  ```
-
-- **Detect Bias**: The bot will analyze the fetched news for biases and provide a summary.
-  ```plaintext
-  User: Summarize the news.
-  Bot: The summary of the news articles is...
-  ```
 
 ## Troubleshooting
-
-- **Contradicting Rules or Stories**: If you encounter errors related to contradicting rules or stories, ensure that your `rules.yml` and `stories.yml` files are consistent and do not conflict with each other.
 
 - **API Key Issues**: Ensure that your API keys are correctly set in the `.env` file and that they have the necessary permissions.
 
