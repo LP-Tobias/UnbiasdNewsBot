@@ -517,7 +517,7 @@ class ActionLlmAnalysis(Action):
             return []
 
         # Helper function to call OpenAI ChatCompletion
-        def openai_chat(prompt: str, model: str = "gpt-3.5-turbo") -> Dict:
+        def openai_chat(prompt: str, model: str = "gpt-4o") -> Dict:
             """
             Sends the prompt to OpenAI ChatCompletion and returns a parsed dictionary of the JSON response.
             NOTE: We assume the LLM's response is strictly valid JSON. 
@@ -902,7 +902,7 @@ class ActionCotDebiasSummary(Action):
             try:
                 # Call the OpenAI API for debiasing
                 response = openai.ChatCompletion.create(
-                    model="gpt-4o",
+                    model="gpt-3.5-turbo",
                     temperature=0.3,
                     messages=[
                         {"role": "system", "content": system_prompt},

@@ -2,24 +2,6 @@
 
 A Rasa-based chatbot designed to fetch news, detect and mitigate biases in articles, and provide neutral summaries. Our goal is to demonstrate **debiased** news generation by integrating an LLM and specialized techniques such as **Chain of Thought (CoT)** prompting.
 
-## Project Structure
-
-```
-.
-├── actions
-│   └── actions.py        # Custom action logic (fetch news, debiasing, CoT, etc.)
-├── config.yml            # Rasa NLU pipeline and policies
-├── credentials.yml       # Credentials for external APIs
-├── domain.yml            # Rasa domain (intents, slots, responses, etc.)
-├── endpoints.yml         # Action server endpoints
-├── data
-│   ├── nlu.yml           # NLU training data
-│   ├── stories.yml       # Story-based training data
-│   └── rules.yml         # Rule-based dialogue data
-└── requirements.txt      # Python dependencies
-```
-
-
 ## Getting Started
 
 1. **Install Dependencies**  
@@ -47,7 +29,6 @@ Please also read the instructions in the requirements.
      python app.py
      ```
 
-## Usage
 
 
 ## Troubleshooting
